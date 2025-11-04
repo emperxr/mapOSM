@@ -458,74 +458,71 @@
       closePanelBtn.addEventListener('click', closePanel);
 
       // criar marcadores e agrupar por categoria
-      const categorias = {};
-      fisicas.forEach(o => {
-        const cat = o.categoria || 'Outros';
-        if (!categorias[cat]) categorias[cat] = [];
-        categorias[cat].push(o);
-      });
+    // criar marcadores e agrupar por categoria
+const categorias = {};
+fisicas.forEach(o => {
+  const cat = o.categoria || 'Outros';
+  if (!categorias[cat]) categorias[cat] = [];
+  categorias[cat].push(o);
+});
 
-      const layers = {};
-      const allMarkers = [];
+const layers = {};
+const allMarkers = [];
 
-      Object.entries(categorias).forEach(([cat, orgs]) => {
-        const layer = L.layerGroup();
-        orgs.forEach(o => {
-          const lat = parseFloat(o.address.latitude), lon = parseFloat(o.address.longitude);
-          if (isNaN(lat) || isNaN(lon)) return;
+Object.entries(categorias).forEach(([cat, orgs]) => {
+  const layer = L.layerGroup();
+  orgs.forEach(o => {
+    const lat = parseFloat(o.address.latitude), lon = parseFloat(o.address.longitude);
+    if (isNaN(lat) || isNaN(lon)) return;
 
-          const marker = L.marker([lat, lon], {
-            icon: L.icon({
-              iconUrl: `/icons/${cat}.svg`, // Caminho para os ícones SVG
-              iconSize: [44, 44], // Defina o tamanho adequado para o ícone
-              iconAnchor: [22, 22], // Centro do ícone
-              popupAnchor: [0, -22] // Posição do popup
-            })
-          });
+    const marker = L.marker([lat, lon], {
+      icon: L.icon({
+        iconUrl: `icons/${cat}.svg`, // ✅ Caminho relativo corrigido (sem barra inicial)
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
+        popupAnchor: [0, -22]
+      })
+    });
 
-          marker.bindPopup(gerarPopupHTML(o), { closeButton: false, offset: [0, -8] });
+    marker.bindPopup(gerarPopupHTML(o), { closeButton: false, offset: [0, -8] });
 
-          marker.on('click', function () {
-            marker.openPopup();
-            openPanelFor(o);
-            map.panTo([lat, lon], { animate: true });
-          });
+    marker.on('click', function () {
+      marker.openPopup();
+      openPanelFor(o);
+      map.panTo([lat, lon], { animate: true });
+    });
 
-          marker.addTo(layer);
-          marker.orgData = o;
-          allMarkers.push(marker);
-        });
-        layers[cat] = layer;
-        layer.addTo(map);
-      });
+    marker.addTo(layer);
+    marker.orgData = o;
+    allMarkers.push(marker);
+  });
+  layers[cat] = layer;
+  layer.addTo(map);
+});
 
-    // FILTROS - bottom-left
+// FILTROS - bottom-left
 const filterPanel = document.getElementById('filterPanel');
 Object.keys(layers).forEach(cat => {
   const btn = document.createElement('div');
   btn.className = 'filter-item active';
 
-  // Carrega o ícone SVG da categoria
-  const iconUrl = `icons_filter/${cat}.svg`; // O caminho para o ícone da categoria
+  // ✅ Caminho relativo corrigido (sem barra inicial)
+  const iconUrl = `icons_filter/${cat}.svg`;
 
-  // Cria um elemento de imagem para o ícone
   const iconImg = document.createElement('img');
   iconImg.src = iconUrl;
-  iconImg.alt = cat;  // O nome da categoria será o texto alternativo da imagem
-  iconImg.style.width = '80px';  // Tamanho do ícone, ajuste conforme necessário
+  iconImg.alt = cat;
+  iconImg.style.width = '80px';
   iconImg.style.height = '80px';
-  iconImg.style.objectFit = 'contain';  // Garante que o ícone seja redimensionado corretamente
+  iconImg.style.objectFit = 'contain';
 
-  // Adiciona a imagem (ícone) ao botão
   btn.appendChild(iconImg);
 
-  // Adiciona o nome da categoria (texto) como parte do botão (de forma invisível, se desejado)
   const categoryName = document.createElement('span');
-  categoryName.textContent = cat;  // Aqui você coloca o nome da categoria como texto
-  categoryName.style.display = 'none'; // Isso oculta o texto (se você preferir manter invisível)
+  categoryName.textContent = cat;
+  categoryName.style.display = 'none';
   btn.appendChild(categoryName);
 
-  // Evento para alternar a visibilidade da camada
   btn.addEventListener('click', () => {
     if (map.hasLayer(layers[cat])) {
       map.removeLayer(layers[cat]);
@@ -536,9 +533,9 @@ Object.keys(layers).forEach(cat => {
     }
   });
 
-  // Adiciona o botão ao painel de filtros
   filterPanel.appendChild(btn);
 });
+
 
 
       // toggle all control
