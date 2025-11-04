@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="pt-PT">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mapa OSM Online</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --bg: #F5E9D0;
+      --accent: #E47D29;
+      --card: #fff;
+      --muted: #6b6b6b;
+      --glass: rgba(255, 255, 255, 0.88);
+      --panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: "Inter", Arial, sans-serif;
+      background: var(--bg);
+    }
+
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* Search (top-right) */
+    .search-box {
+      position: absolute;
+      top: 12px;
+      right: 20px;
+      z-index: 1400;
+    }
+
+    .search-box input {
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      width: 280px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 6px rgba(228, 125, 41, 0.18);
+    }
+
+    #searchResults {
+      position: absolute;
+      top: 46px;
+      right: 0;
+      z-index: 1500;
+      width: 350px;
+      max-height: 300px;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      display: none;
+      padding: 10px;
+    }
+
+    #searchResults li {
+      list-style: none;
+      padding: 10px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #searchResults li:hover {
+      background: #fbefe0;
+    }
+
+    /* Estilo para exibir categoria, nome e imagem do item */
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .result-item img {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+      background-color: #eee;
+    }
+
+    .result-item .m-title {
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    .result-item .m-cat {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Side panel (responsive) */
+    .side-panel {
+      position: fixed;
+      right: 18px;
+      top: 56px;
+      width: 35%;
+      max-width: 400px;
+      min-width: 280px;
+      height: calc(100vh - 96px);
+      background: var(--glass);
+      border-radius: 12px;
+      box-shadow: var(--panel-shadow);
+      z-index: 2000;
+      transform: translateX(420px);
+      transition: transform 260ms ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      backdrop-filter: blur(4px);
+    }
+
+    .side-panel.open {
+      transform: translateX(0);
+    }
+
+    @media(max-width:900px) {
+      .side-panel {
+        width: 90%;
+        right: 6px;
+        transform: translateX(110%);
+      }
+    }
+
+    .panel-header {
+      position: relative;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.98));
+    }
+
+    .panel-header img {
+      width: 110px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+      border: 4px solid rgba(255, 255, 255, 0.85);
+      background: #eee;
+    }
+
+    .panel-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    .panel-cat {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .media-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .media-row a {
+      display: inline-flex;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      font-size: 16px;
+    }
+
+    .panel-body {
+      padding: 12px 16px;
+      overflow: auto;
+      flex: 1;
+    }
+
+    .section-title {
+      color: var(--accent);
+      font-weight: 700;
+      margin: 10px 0;
+      font-size: 13px;
+    }
+
+    .about {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+
+    .info-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 15px 0;
+    }
+
+    .info-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex: 0 0 34px;
+    }
+
+    .info-text {
+      font-size: 14px;
+      color: #333;
+      word-break: break-word;
+    }
+
+    .static-activities {
+      margin-top: 12px;
+      padding: 10px;
+      background: #fff6f0;
+      border-radius: 8px;
+      border: 1px solid rgba(228, 125, 41, 0.06);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .panel-close {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      background: rgba(0, 0, 0, 0.06);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* Filters bottom-left */
+    .filter-panel {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 1300;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      max-width: 260px;
+    }
+
+    .filter-item {
+      border-radius: 25px;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    .filter-item.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center; /* Centraliza horizontalmente */
+    }
+
+    .toggle-all {
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    /* leaflet z-index */
+    .leaflet-container {
+      z-index: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="search-box">
+    <input id="searchInput" type="text" placeholder="🔍 Pesquisar organizações..." />
+    <ul id="searchResults"></ul>
+  </div>
+
+  <div id="map"></div>
+
+  <!-- Filters bottom-left -->
+  <div id="filterPanel" class="filter-panel" aria-hidden="false"></div>
+
+  <!-- SIDE PANEL -->
+  <aside id="sidePanel" class="side-panel" aria-hidden="true">
+    <div class="panel-header">
+      <button id="closePanel" class="panel-close" title="Fechar">✕</button>
+      <img id="panelImg" src="" alt="Imagem" />
+      <div class="panel-name" id="panelName">Nome</div>
+      <div class="panel-cat" id="panelCat">Categoria</div>
+      <div class="media-row" id="panelMedia"></div>
+    </div>
+
+    <div class="panel-body" id="panelBody">
+      <div>
+        <div class="section-title">Sobre</div>
+        <div class="about" id="panelAbout">Proposito</div>
+      </div>
+
+      <div>
+        <div class="section-title">Morada</div>
+        <div class="info-row">
+          <div class="info-icon">
+            <img src="icons_list/iconAddress.svg" alt="Morada" class="icon-svg">
+          </div>
+          <div class="info-text" id="panelAddress">Endereço completo</div>
+        </div>
+
+        <div class="section-title">Telefone</div>
+        <div class="info-row">
+          <div class="info-icon">
+            <img src="icons_list/iconCall.svg" alt="Telefone" class="icon-svg">
+          </div>
+          <div class="info-text" id="panelPhone">+351 ...</div>
+        </div>
+
+        <div class="section-title">Email</div>
+        <div class="info-row">
+          <div class="info-icon">
+            <img src="icons_list/iconEmail.svg" alt="Email" class="icon-svg">
+          </div>
+          <div class="info-text" id="panelEmail">email@exemplo.pt</div>
+        </div>
+
+        <div class="section-title">Website</div>
+        <div class="info-row">
+          <div class="info-icon">
+            <img src="icons_list/iconWebsite.svg" alt="Website" class="icon-svg">
+          </div>
+          <div class="info-text" id="panelWebsite">https://...</div>
+        </div>
+
+        <div class="section-title">Atividades</div>
+        <div class="info-row">
+          <div class="info-icon">
+            <img src="icons_list/iconActivities.svg" alt="Atividades" class="icon-svg">
+          </div>
+          <div class="static-activities">
+            Atividades: exposição, oficina, contactos e eventos....
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Carrega dados
+    fetch('data.json').then(r => r.json()).then(data => {
+      const fisicas = Array.isArray(data) ? data.filter(d => (d.type || '').toLowerCase() === 'fisica' && d.address && d.address.latitude && d.address.longitude) : [];
+
+      const map = L.map('map').setView([38.72, -9.18], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      // UI refs
+      const sidePanel = document.getElementById('sidePanel');
+      const closePanelBtn = document.getElementById('closePanel');
+      const panelImg = document.getElementById('panelImg');
+      const panelName = document.getElementById('panelName');
+      const panelCat = document.getElementById('panelCat');
+      const panelMedia = document.getElementById('panelMedia');
+      const panelAbout = document.getElementById('panelAbout');
+      const panelAddress = document.getElementById('panelAddress');
+      const panelPhone = document.getElementById('panelPhone');
+      const panelEmail = document.getElementById('panelEmail');
+      const panelWebsite = document.getElementById('panelWebsite');
+
+      function gerarPopupHTML(o) {
+        const thumb = o.img ? `<img src="${o.img}" alt="${(o.nome || '')}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;" />` : `<div style="width:44px;height:44px;border-radius:6px;background:#eee;"></div>`;
+        return `<div class="mini-popup">${thumb}<div class="m-title">${o.nome || ''}</div></div>`;
+      }
+
+      function openPanelFor(o) {
+        panelImg.src = o.img || '';
+        panelImg.alt = o.nome || 'Imagem';
+        panelName.textContent = o.nome || '-';
+        panelCat.textContent = o.categoria || '';
+        panelAbout.textContent = o.proposito || (o.description || o.sobre || 'Sem descrição disponível.');
+        panelAddress.textContent = (o.address && o.address.fullAddress) ? o.address.fullAddress : (o.fullAddress || '-');
+        panelPhone.textContent = o.telefone || '-';
+        panelEmail.textContent = o.email || '-';
+        panelWebsite.innerHTML = o.website ? `<a href="${o.website}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${o.website}</a>` : '-';
+
+        // mediaLinks
+        panelMedia.innerHTML = '';
+        const links = o.mediaLinks || {};
+        if (links.website) { const a = document.createElement('a'); a.href = links.website; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '🌐'; panelMedia.appendChild(a); }
+        if (links.facebook) { const a = document.createElement('a'); a.href = links.facebook; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '📘'; panelMedia.appendChild(a); }
+        if (links.instagram) { const a = document.createElement('a'); a.href = links.instagram; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '📸'; panelMedia.appendChild(a); }
+        if (links.tiktok) { const a = document.createElement('a'); a.href = links.tiktok; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '🎵'; panelMedia.appendChild(a); }
+        if (links.linkedin) { const a = document.createElement('a'); a.href = links.linkedin; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '💼'; panelMedia.appendChild(a); }
+        if (links.youtube) { const a = document.createElement('a'); a.href = links.youtube; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '▶️'; panelMedia.appendChild(a); }
+
+        sidePanel.classList.add('open');
+        sidePanel.setAttribute('aria-hidden', 'false');
+      }
+
+      function closePanel() {
+        sidePanel.classList.remove('open');
+        sidePanel.setAttribute('aria-hidden', 'true');
+      }
+
+      closePanelBtn.addEventListener('click', closePanel);
+
+      // criar marcadores e agrupar por categoria
+      const categorias = {};
+      fisicas.forEach(o => {
+        const cat = o.categoria || 'Outros';
+        if (!categorias[cat]) categorias[cat] = [];
+        categorias[cat].push(o);
+      });
+
+      const layers = {};
+      const allMarkers = [];
+
+      Object.entries(categorias).forEach(([cat, orgs]) => {
+        const layer = L.layerGroup();
+        orgs.forEach(o => {
+          const lat = parseFloat(o.address.latitude), lon = parseFloat(o.address.longitude);
+          if (isNaN(lat) || isNaN(lon)) return;
+
+          const marker = L.marker([lat, lon], {
+            icon: L.icon({
+              iconUrl: `/icons/${cat}.svg`, // Caminho para os ícones SVG
+              iconSize: [44, 44], // Defina o tamanho adequado para o ícone
+              iconAnchor: [22, 22], // Centro do ícone
+              popupAnchor: [0, -22] // Posição do popup
+            })
+          });
+
+          marker.bindPopup(gerarPopupHTML(o), { closeButton: false, offset: [0, -8] });
+
+          marker.on('click', function () {
+            marker.openPopup();
+            openPanelFor(o);
+            map.panTo([lat, lon], { animate: true });
+          });
+
+          marker.addTo(layer);
+          marker.orgData = o;
+          allMarkers.push(marker);
+        });
+        layers[cat] = layer;
+        layer.addTo(map);
+      });
+
+    // FILTROS - bottom-left
+const filterPanel = document.getElementById('filterPanel');
+Object.keys(layers).forEach(cat => {
+  const btn = document.createElement('div');
+  btn.className = 'filter-item active';
+
+  // Carrega o ícone SVG da categoria
+  const iconUrl = `icons_filter/${cat}.svg`; // O caminho para o ícone da categoria
+
+  // Cria um elemento de imagem para o ícone
+  const iconImg = document.createElement('img');
+  iconImg.src = iconUrl;
+  iconImg.alt = cat;  // O nome da categoria será o texto alternativo da imagem
+  iconImg.style.width = '80px';  // Tamanho do ícone, ajuste conforme necessário
+  iconImg.style.height = '80px';
+  iconImg.style.objectFit = 'contain';  // Garante que o ícone seja redimensionado corretamente
+
+  // Adiciona a imagem (ícone) ao botão
+  btn.appendChild(iconImg);
+
+  // Adiciona o nome da categoria (texto) como parte do botão (de forma invisível, se desejado)
+  const categoryName = document.createElement('span');
+  categoryName.textContent = cat;  // Aqui você coloca o nome da categoria como texto
+  categoryName.style.display = 'none'; // Isso oculta o texto (se você preferir manter invisível)
+  btn.appendChild(categoryName);
+
+  // Evento para alternar a visibilidade da camada
+  btn.addEventListener('click', () => {
+    if (map.hasLayer(layers[cat])) {
+      map.removeLayer(layers[cat]);
+      btn.classList.remove('active');
+    } else {
+      map.addLayer(layers[cat]);
+      btn.classList.add('active');
+    }
+  });
+
+  // Adiciona o botão ao painel de filtros
+  filterPanel.appendChild(btn);
+});
+
+
+      // toggle all control
+      const controlsDiv = document.createElement('div');
+      controlsDiv.className = 'filter-controls';
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'toggle-all';
+      toggleBtn.textContent = '👁️ Ocultar Todas';
+      let allVisible = true;
+      toggleBtn.addEventListener('click', () => {
+        allVisible = !allVisible;
+        toggleBtn.textContent = allVisible ? '👁️ Ocultar Todas' : '👁️ Mostrar Todas';
+        Object.entries(layers).forEach(([cat, layer]) => {
+          const btn = Array.from(filterPanel.children).find(el => el.textContent === cat);
+          if (allVisible) { map.addLayer(layer); btn.classList.add('active'); }
+          else { map.removeLayer(layer); btn.classList.remove('active'); }
+        });
+      });
+      controlsDiv.appendChild(toggleBtn);
+      filterPanel.appendChild(controlsDiv);
+
+      // SEARCH functionality
+      const searchInput = document.getElementById('searchInput');
+      const resultsList = document.getElementById('searchResults');
+
+      searchInput.addEventListener('input', e => {
+        const q = e.target.value.toLowerCase().trim();
+        
+        searchInput.placeholder = q ? `Pesquisando: ${q}` : '🔍 Pesquisar organizações...';
+
+        resultsList.innerHTML = '';
+        if (!q) {
+          resultsList.style.display = 'none';
+          return;
+        }
+
+        const results = fisicas.filter(o => (o.nome || '').toLowerCase().includes(q)).sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+        if (results.length === 0) {
+          resultsList.style.display = 'none';
+          return;
+        }
+
+        results.forEach(o => {
+          const li = document.createElement('li');
+          li.className = 'result-item';
+
+          // Criando a estrutura de exibição para o item (com imagem, nome e categoria)
+          const image = o.img ? `<img src="${o.img}" alt="${o.nome}" />` : `<img src="default-image.png" alt="${o.nome}" />`;
+          const title = `<div class="m-title">${o.nome}</div>`;
+          const category = `<div class="m-cat">${o.categoria}</div>`;
+          
+          li.innerHTML = `${image}${title}${category}`;
+          
+          li.addEventListener('click', () => {
+            const lat = parseFloat(o.address.latitude), lon = parseFloat(o.address.longitude);
+            map.setView([lat, lon], 15, { animate: true });
+            // popup temporário (mini) e abre painel
+            L.popup({ closeButton: false, offset: [0, -8] }).setLatLng([lat, lon]).setContent(gerarPopupHTML(o)).openOn(map);
+            openPanelFor(o);
+            resultsList.innerHTML = ''; 
+            resultsList.style.display = 'none';
+          });
+
+          resultsList.appendChild(li);
+        });
+        resultsList.style.display = 'block';
+      });
+
+      
+
+    }).catch(err => {
+      console.error('Erro a carregar data.json', err);
+      alert('Erro a carregar data.json — confirma o ficheiro e o formato (ver console).');
+    });
+  </script>
+</body>
+
+</html>
