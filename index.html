@@ -399,7 +399,16 @@
   <script>
     // Carrega dados
     fetch('data.json').then(r => r.json()).then(data => {
-      const fisicas = Array.isArray(data) ? data.filter(d => (d.type || '').toLowerCase() === 'fisica' && d.address && d.address.latitude && d.address.longitude) : [];
+     const todos = Array.isArray(data) ? data : [];
+
+// Físicas (com coordenadas válidas)
+const fisicas = todos.filter(d => (d.type || '').toLowerCase() === 'fisica' && d.address && d.address.latitude && d.address.longitude);
+
+// Digitais (sem coordenadas, mas queremos que apareçam nas pesquisas)
+const digitais = todos.filter(d => (d.type || '').toLowerCase() === 'digital');
+
+// Junta os dois para pesquisa
+const pesquisaveis = [...fisicas, ...digitais];
 
       const map = L.map('map').setView([38.72, -9.18], 12);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -572,8 +581,8 @@ Object.keys(layers).forEach(cat => {
           return;
         }
 
-        const results = fisicas.filter(o => (o.nome || '').toLowerCase().includes(q)).sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
-        if (results.length === 0) {
+        const results = pesquisaveis.filter(o => (o.nome || '').toLowerCase().includes(q))
+if (results.length === 0) {
           resultsList.style.display = 'none';
           return;
         }
@@ -589,15 +598,26 @@ Object.keys(layers).forEach(cat => {
           
           li.innerHTML = `${image}${title}${category}`;
           
-          li.addEventListener('click', () => {
-            const lat = parseFloat(o.address.latitude), lon = parseFloat(o.address.longitude);
-            map.setView([lat, lon], 15, { animate: true });
-            // popup temporário (mini) e abre painel
-            L.popup({ closeButton: false, offset: [0, -8] }).setLatLng([lat, lon]).setContent(gerarPopupHTML(o)).openOn(map);
-            openPanelFor(o);
-            resultsList.innerHTML = ''; 
-            resultsList.style.display = 'none';
-          });
+li.addEventListener('click', () => {
+  resultsList.innerHTML = ''; 
+  resultsList.style.display = 'none';
+  openPanelFor(o);
+
+  const lat = o?.address?.latitude;
+  const lon = o?.address?.longitude;
+  
+  if (lat && lon) {
+    const latNum = parseFloat(lat), lonNum = parseFloat(lon);
+    if (!isNaN(latNum) && !isNaN(lonNum)) {
+      map.setView([latNum, lonNum], 15, { animate: true });
+      L.popup({ closeButton: false, offset: [0, -8] })
+        .setLatLng([latNum, lonNum])
+        .setContent(gerarPopupHTML(o))
+        .openOn(map);
+    }
+  }
+});
+
 
           resultsList.appendChild(li);
         });
