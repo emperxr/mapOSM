@@ -107,6 +107,98 @@
       color: var(--muted);
     }
 
+    /* Botão Digitais (canto inferior direito) */
+#digitalBtn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1500;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  transition: transform 0.2s ease, background 0.2s;
+}
+#digitalBtn:hover {
+  background: #d66a1f;
+  transform: scale(1.05);
+}
+
+/* Painel Digitais */
+#digitalPanel {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 360px;
+  max-height: 70vh;
+  background: var(--glass);
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  box-shadow: var(--panel-shadow);
+  border: 1px solid rgba(0,0,0,0.08);
+  display: none;
+  flex-direction: column;
+  z-index: 2000;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+#digitalPanel.open {
+  display: flex;
+}
+
+#digitalPanel h3 {
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--accent);
+  color: white;
+  font-size: 16px;
+  text-align: center;
+}
+
+#digitalList {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+#digitalList li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+#digitalList li:hover {
+  background: #fbefe0;
+}
+
+#digitalList img {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #eee;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
     /* Side panel (responsive) */
     .side-panel {
       position: fixed;
@@ -327,6 +419,16 @@
     <input id="searchInput" type="text" placeholder="🔍 Pesquisar organizações..." />
     <ul id="searchResults"></ul>
   </div>
+
+  <!-- Botão Digitais -->
+<button id="digitalBtn" title="Ver Associações Digitais">💻</button>
+
+<!-- Painel com lista de Digitais -->
+<div id="digitalPanel">
+  <h3>🌐 Associações Digitais</h3>
+  <ul id="digitalList"></ul>
+</div>
+
 
   <div id="map"></div>
 
@@ -623,6 +725,55 @@ li.addEventListener('click', () => {
         });
         resultsList.style.display = 'block';
       });
+
+      // === BOTÃO DE ASSOCIAÇÕES DIGITAIS ===
+const digitalBtn = document.getElementById('digitalBtn');
+const digitalPanel = document.getElementById('digitalPanel');
+const digitalList = document.getElementById('digitalList');
+
+digitalBtn.addEventListener('click', () => {
+  // Alterna visibilidade do painel
+  digitalPanel.classList.toggle('open');
+
+  // Se o painel for aberto, preenche a lista
+  if (digitalPanel.classList.contains('open')) {
+    digitalList.innerHTML = '';
+
+    if (digitais.length === 0) {
+      digitalList.innerHTML = '<li>Nenhuma associação digital encontrada.</li>';
+      return;
+    }
+
+    digitais.forEach(o => {
+      const li = document.createElement('li');
+      const img = document.createElement('img');
+      img.src = o.img || 'default-image.png';
+      img.alt = o.nome || 'Sem imagem';
+      const infoDiv = document.createElement('div');
+      const name = document.createElement('div');
+      name.textContent = o.nome || '-';
+      name.style.fontWeight = '700';
+      name.style.color = 'var(--accent)';
+      const cat = document.createElement('div');
+      cat.textContent = o.categoria || '';
+      cat.style.fontSize = '13px';
+      cat.style.color = 'var(--muted)';
+
+      infoDiv.appendChild(name);
+      infoDiv.appendChild(cat);
+      li.appendChild(img);
+      li.appendChild(infoDiv);
+
+      li.addEventListener('click', () => {
+        openPanelFor(o);
+        digitalPanel.classList.remove('open');
+      });
+
+      digitalList.appendChild(li);
+    });
+  }
+});
+
 
       
 
