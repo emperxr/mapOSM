@@ -108,95 +108,103 @@
     }
 
     /* Botão Digitais (canto inferior direito) */
-#digitalBtn {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1500;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-size: 24px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-  transition: transform 0.2s ease, background 0.2s;
-}
-#digitalBtn:hover {
-  background: #d66a1f;
-  transform: scale(1.05);
-}
+    #digitalBtn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1500;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 24px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+      transition: transform 0.2s ease, background 0.2s;
+    }
 
-/* Painel Digitais */
-#digitalPanel {
-  position: fixed;
-  bottom: 90px;
-  right: 20px;
-  width: 360px;
-  max-height: 70vh;
-  background: var(--glass);
-  backdrop-filter: blur(6px);
-  border-radius: 12px;
-  box-shadow: var(--panel-shadow);
-  border: 1px solid rgba(0,0,0,0.08);
-  display: none;
-  flex-direction: column;
-  z-index: 2000;
-  overflow: hidden;
-  animation: fadeIn 0.2s ease;
-}
+    #digitalBtn:hover {
+      background: #d66a1f;
+      transform: scale(1.05);
+    }
 
-#digitalPanel.open {
-  display: flex;
-}
+    /* Painel Digitais */
+    #digitalPanel {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 360px;
+      max-height: 70vh;
+      background: var(--glass);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      box-shadow: var(--panel-shadow);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      display: none;
+      flex-direction: column;
+      z-index: 2000;
+      overflow: hidden;
+      animation: fadeIn 0.2s ease;
+    }
 
-#digitalPanel h3 {
-  margin: 0;
-  padding: 12px 16px;
-  background: var(--accent);
-  color: white;
-  font-size: 16px;
-  text-align: center;
-}
+    #digitalPanel.open {
+      display: flex;
+    }
 
-#digitalList {
-  list-style: none;
-  margin: 0;
-  padding: 10px;
-  overflow-y: auto;
-  flex: 1;
-}
+    #digitalPanel h3 {
+      margin: 0;
+      padding: 12px 16px;
+      background: var(--accent);
+      color: white;
+      font-size: 16px;
+      text-align: center;
+    }
 
-#digitalList li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border-bottom: 1px solid #f0f0f0;
-  cursor: pointer;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 6px;
-}
+    #digitalList {
+      list-style: none;
+      margin: 0;
+      padding: 10px;
+      overflow-y: auto;
+      flex: 1;
+    }
 
-#digitalList li:hover {
-  background: #fbefe0;
-}
+    #digitalList li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
 
-#digitalList img {
-  width: 44px;
-  height: 44px;
-  border-radius: 6px;
-  object-fit: cover;
-  background: #eee;
-}
+    #digitalList li:hover {
+      background: #fbefe0;
+    }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+    #digitalList img {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #eee;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
 
     /* Side panel (responsive) */
@@ -393,7 +401,8 @@
       display: flex;
       gap: 8px;
       align-items: center;
-      justify-content: center; /* Centraliza horizontalmente */
+      justify-content: center;
+      /* Centraliza horizontalmente */
     }
 
     .toggle-all {
@@ -421,13 +430,13 @@
   </div>
 
   <!-- Botão Digitais -->
-<button id="digitalBtn" title="Ver Associações Digitais">💻</button>
+  <button id="digitalBtn" title="Ver Associações Digitais">💻</button>
 
-<!-- Painel com lista de Digitais -->
-<div id="digitalPanel">
-  <h3>🌐 Associações Digitais</h3>
-  <ul id="digitalList"></ul>
-</div>
+  <!-- Painel com lista de Digitais -->
+  <div id="digitalPanel">
+    <h3>🌐 Associações Digitais</h3>
+    <ul id="digitalList"></ul>
+  </div>
 
 
   <div id="map"></div>
@@ -484,13 +493,10 @@
           <div class="info-text" id="panelWebsite">https://...</div>
         </div>
 
-        <div class="section-title">Atividades</div>
         <div class="info-row">
-          <div class="info-icon">
-            <img src="icons_list/iconActivities.svg" alt="Atividades" class="icon-svg">
-          </div>
+
           <div class="static-activities">
-            Atividades: exposição, oficina, contactos e eventos....
+            Atividades: exposições, oficinas, congressos e eventos....
           </div>
         </div>
       </div>
@@ -498,41 +504,41 @@
   </aside>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-fetch('data.json').then(r => r.json()).then(data => {
-  const todos = Array.isArray(data) ? data : [];
+  <script>
+    fetch('data.json').then(r => r.json()).then(data => {
+      const todos = Array.isArray(data) ? data : [];
 
-  const fisicas = todos.filter(d => (d.type || '').toLowerCase() === 'fisica' && d.address && d.address.latitude && d.address.longitude);
-  const digitais = todos.filter(d => (d.type || '').toLowerCase() === 'digital');
-  const pesquisaveis = [...fisicas, ...digitais];
+      const fisicas = todos.filter(d => (d.type || '').toLowerCase() === 'fisica' && d.address && d.address.latitude && d.address.longitude);
+      const digitais = todos.filter(d => (d.type || '').toLowerCase() === 'digital');
+      const pesquisaveis = [...fisicas, ...digitais];
 
-  const map = L.map('map').setView([38.72, -9.18], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
+      const map = L.map('map').setView([38.72, -9.18], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
 
-  // === Referências da interface ===
-  const sidePanel = document.getElementById('sidePanel');
-  const closePanelBtn = document.getElementById('closePanel');
-  const panelImg = document.getElementById('panelImg');
-  const panelName = document.getElementById('panelName');
-  const panelCat = document.getElementById('panelCat');
-  const panelMedia = document.getElementById('panelMedia');
-  const panelAbout = document.getElementById('panelAbout');
-  const panelAddress = document.getElementById('panelAddress');
-  const panelPhone = document.getElementById('panelPhone');
-  const panelEmail = document.getElementById('panelEmail');
-  const panelWebsite = document.getElementById('panelWebsite');
+      // === Referências da interface ===
+      const sidePanel = document.getElementById('sidePanel');
+      const closePanelBtn = document.getElementById('closePanel');
+      const panelImg = document.getElementById('panelImg');
+      const panelName = document.getElementById('panelName');
+      const panelCat = document.getElementById('panelCat');
+      const panelMedia = document.getElementById('panelMedia');
+      const panelAbout = document.getElementById('panelAbout');
+      const panelAddress = document.getElementById('panelAddress');
+      const panelPhone = document.getElementById('panelPhone');
+      const panelEmail = document.getElementById('panelEmail');
+      const panelWebsite = document.getElementById('panelWebsite');
 
-// === Função para gerar popup curto ===
-function gerarPopupHTML(o) {
-  const thumb = o.img 
-    ? `<img src="${o.img}" alt="${(o.nome || '')}" 
+      // === Função para gerar popup curto ===
+      function gerarPopupHTML(o) {
+        const thumb = o.img
+          ? `<img src="${o.img}" alt="${(o.nome || '')}" 
         style="width:48px;height:48px;object-fit:cover;border-radius:50%;border:none;" />`
-    : ''; // sem fundo quando não há imagem
+          : ''; // sem fundo quando não há imagem
 
-  return `
+        return `
     <div class="mini-popup" 
          style="display:flex;align-items:center;gap:10px;">
       ${thumb}
@@ -541,297 +547,297 @@ function gerarPopupHTML(o) {
         ${o.nome || ''}
       </div>
     </div>`;
-}
-
-
-  // === Abrir painel lateral com dados ===
-  function openPanelFor(o) {
-    // --- imagem ---
-    if (o.img) {
-      panelImg.src = o.img;
-      panelImg.style.display = 'block';
-    } else {
-      panelImg.src = '';
-      panelImg.style.display = 'none'; // ✅ oculta quando não há imagem
-    }
-
-    // --- textos e info ---
-    panelName.textContent = o.nome || '-';
- const categoriaMap = {
-  'grupo': 'Grupo',
-  'coletivo_cultural': 'Coletivo Cultural',
-  'associacao': 'Associação',
-  'empresa_social': 'Empresa Social',
-  'outros': 'Outros'
-};
-panelCat.textContent = categoriaMap[o.categoria?.toLowerCase()] || (o.categoria ? o.categoria.charAt(0).toUpperCase() + o.categoria.slice(1) : '-');
-
-    panelAbout.textContent = o.proposito || o.description || o.sobre || 'Sem descrição disponível.';
-
-// Morada — mostra o endereço visível e clicável
-if (o.address && (o.address.latitude && o.address.longitude)) {
-  const lat = o.address.latitude;
-  const lon = o.address.longitude;
-  const addr = o.address.fullAddress || 'Abrir no Google Maps';
-  panelAddress.innerHTML = `<a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${addr}</a>`;
-} else if (o.address && o.address.fullAddress) {
-  const addr = o.address.fullAddress;
-  const query = encodeURIComponent(addr);
-  panelAddress.innerHTML = `<a href="https://www.google.com/maps/search/?api=1&query=${query}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${addr}</a>`;
-} else {
-  panelAddress.textContent = 'Não possui morada física.';
-}
-
-
-// Telefone
-panelPhone.innerHTML = o.telefone 
-  ? `<a href="tel:${o.telefone}" style="color:var(--accent); text-decoration:none">${o.telefone}</a>` 
-  : 'Não possui telefone.';
-
-// Email
-panelEmail.innerHTML = o.email 
-  ? `<a href="mailto:${o.email}" style="color:var(--accent); text-decoration:none">${o.email}</a>` 
-  : 'Não possui email.';
-
-// Website
-panelWebsite.innerHTML = o.website 
-  ? `<a href="${o.website}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${o.website}</a>` 
-  : 'Não possui website.';
-
-    // --- redes sociais ---
-    panelMedia.innerHTML = '';
-    const links = o.mediaLinks || {};
-    const icons = {
-      website: '🌐', facebook: '📘', instagram: '📸',
-      tiktok: '🎵', linkedin: '💼', youtube: '▶️'
-    };
-    Object.entries(links).forEach(([key, url]) => {
-      if (url) {
-        const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.innerText = icons[key] || '🔗';
-        panelMedia.appendChild(a);
       }
-    });
 
-    sidePanel.classList.add('open');
-    sidePanel.setAttribute('aria-hidden', 'false');
-  }
 
-  function closePanel() {
-    sidePanel.classList.remove('open');
-    sidePanel.setAttribute('aria-hidden', 'true');
-  }
-  closePanelBtn.addEventListener('click', closePanel);
+      // === Abrir painel lateral com dados ===
+      function openPanelFor(o) {
+        // --- imagem ---
+        if (o.img) {
+          panelImg.src = o.img;
+          panelImg.style.display = 'block';
+        } else {
+          panelImg.src = '';
+          panelImg.style.display = 'none'; // ✅ oculta quando não há imagem
+        }
 
-  // === Criar marcadores agrupados por categoria ===
-  const categorias = {};
-  fisicas.forEach(o => {
-    const cat = o.categoria || 'Outros';
-    if (!categorias[cat]) categorias[cat] = [];
-    categorias[cat].push(o);
-  });
+        // --- textos e info ---
+        panelName.textContent = o.nome || '-';
+        const categoriaMap = {
+          'grupo': 'Grupo',
+          'coletivo_cultural': 'Coletivo Cultural',
+          'associacao': 'Associação',
+          'empresa_social': 'Empresa Social',
+          'outros': 'Outros'
+        };
+        panelCat.textContent = categoriaMap[o.categoria?.toLowerCase()] || (o.categoria ? o.categoria.charAt(0).toUpperCase() + o.categoria.slice(1) : '-');
 
-  const layers = {};
-  const allMarkers = [];
+        panelAbout.textContent = o.proposito || o.description || o.sobre || 'Sem descrição disponível.';
 
-  Object.entries(categorias).forEach(([cat, orgs]) => {
-    const layer = L.layerGroup();
-    orgs.forEach(o => {
-      const lat = parseFloat(o.address.latitude), lon = parseFloat(o.address.longitude);
-      if (isNaN(lat) || isNaN(lon)) return;
+        // Morada — mostra o endereço visível e clicável
+        if (o.address && (o.address.latitude && o.address.longitude)) {
+          const lat = o.address.latitude;
+          const lon = o.address.longitude;
+          const addr = o.address.fullAddress || 'Abrir no Google Maps';
+          panelAddress.innerHTML = `<a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${addr}</a>`;
+        } else if (o.address && o.address.fullAddress) {
+          const addr = o.address.fullAddress;
+          const query = encodeURIComponent(addr);
+          panelAddress.innerHTML = `<a href="https://www.google.com/maps/search/?api=1&query=${query}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${addr}</a>`;
+        } else {
+          panelAddress.textContent = 'Não possui morada física.';
+        }
 
-      const marker = L.marker([lat, lon], {
-        icon: L.icon({
-          iconUrl: `icons/${cat}.svg`,
-          iconSize: [44, 44],
-          iconAnchor: [22, 22],
-          popupAnchor: [0, -22]
-        })
-      });
 
-      marker.bindPopup(gerarPopupHTML(o), { closeButton: false, offset: [0, -8] });
-      marker.on('click', () => {
-        marker.openPopup();
-        openPanelFor(o);
-        map.panTo([lat, lon], { animate: true });
-      });
+        // Telefone
+        panelPhone.innerHTML = o.telefone
+          ? `<a href="tel:${o.telefone}" style="color:var(--accent); text-decoration:none">${o.telefone}</a>`
+          : 'Não possui telefone.';
 
-      marker.addTo(layer);
-      marker.orgData = o;
-      allMarkers.push(marker);
-    });
-    layers[cat] = layer;
-    layer.addTo(map);
-  });
+        // Email
+        panelEmail.innerHTML = o.email
+          ? `<a href="mailto:${o.email}" style="color:var(--accent); text-decoration:none">${o.email}</a>`
+          : 'Não possui email.';
 
-  // === Painel de filtros ===
-  const filterPanel = document.getElementById('filterPanel');
-  Object.keys(layers).forEach(cat => {
-    const btn = document.createElement('div');
-    btn.className = 'filter-item active';
-    const iconUrl = `icons_filter/${cat}.svg`;
+        // Website
+        panelWebsite.innerHTML = o.website
+          ? `<a href="${o.website}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${o.website}</a>`
+          : 'Não possui website.';
 
-    const iconImg = document.createElement('img');
-    iconImg.src = iconUrl;
-    iconImg.alt = cat;
-    iconImg.style.width = '80px';
-    iconImg.style.height = '80px';
-    iconImg.style.objectFit = 'contain';
-
-    btn.appendChild(iconImg);
-    const categoryName = document.createElement('span');
-    categoryName.textContent = cat;
-    categoryName.style.display = 'none';
-    btn.appendChild(categoryName);
-
-    btn.addEventListener('click', () => {
-      if (map.hasLayer(layers[cat])) {
-        map.removeLayer(layers[cat]);
-        btn.classList.remove('active');
-      } else {
-        map.addLayer(layers[cat]);
-        btn.classList.add('active');
-      }
-    });
-
-    filterPanel.appendChild(btn);
-  });
-
-  // === Botão de alternar todos ===
-  const controlsDiv = document.createElement('div');
-  controlsDiv.className = 'filter-controls';
-  const toggleBtn = document.createElement('button');
-  toggleBtn.className = 'toggle-all';
-  toggleBtn.textContent = '👁️ Ocultar Todas';
-  let allVisible = true;
-  toggleBtn.addEventListener('click', () => {
-    allVisible = !allVisible;
-    toggleBtn.textContent = allVisible ? '👁️ Ocultar Todas' : '👁️ Mostrar Todas';
-    Object.entries(layers).forEach(([cat, layer]) => {
-      const btn = Array.from(filterPanel.children).find(el => el.textContent === cat);
-      if (allVisible) { map.addLayer(layer); btn.classList.add('active'); }
-      else { map.removeLayer(layer); btn.classList.remove('active'); }
-    });
-  });
-  controlsDiv.appendChild(toggleBtn);
-  filterPanel.appendChild(controlsDiv);
-
-  // === PESQUISA ===
-  const searchInput = document.getElementById('searchInput');
-  const resultsList = document.getElementById('searchResults');
-
-  searchInput.addEventListener('input', e => {
-    
-    const q = e.target.value.toLowerCase().trim();
-    searchInput.placeholder = q ? `Pesquisando: ${q}` : '🔍 Pesquisar organizações...';
-
-    resultsList.innerHTML = '';
-    if (!q) {
-      resultsList.style.display = 'none';
-      return;
-    }
-
-    const results = pesquisaveis.filter(o => (o.nome || '').toLowerCase().includes(q));
-
-    // ✅ MOSTRAR MENSAGEM QUANDO NÃO HÁ RESULTADOS
-    if (results.length === 0) {
-      resultsList.innerHTML = `<li style="color:#999; text-align:center; padding:12px;">Nenhuma registro encontrado.</li>`;
-      resultsList.style.display = 'block';
-      return;
-    }
-
-    results.forEach(o => {
-      const li = document.createElement('li');
-      li.className = 'result-item';
-
-      // imagem só se existir
-      const image = o.img 
-        ? `<img src="${o.img}" alt="${o.nome}" />` 
-        : '';
-
-      const title = `<div class="m-title">${o.nome}</div>`;
-      const category = `<div class="m-cat">${o.categoria}</div>`;
-      li.innerHTML = `${image}${title}${category}`;
-
-      li.addEventListener('click', () => {
-        resultsList.innerHTML = '';
-        resultsList.style.display = 'none';
-        openPanelFor(o);
-
-        const lat = o?.address?.latitude;
-        const lon = o?.address?.longitude;
-        if (lat && lon) {
-          const latNum = parseFloat(lat), lonNum = parseFloat(lon);
-          if (!isNaN(latNum) && !isNaN(lonNum)) {
-            map.setView([latNum, lonNum], 15, { animate: true });
-            L.popup({ closeButton: false, offset: [0, -8] })
-              .setLatLng([latNum, lonNum])
-              .setContent(gerarPopupHTML(o))
-              .openOn(map);
+        // --- redes sociais ---
+        panelMedia.innerHTML = '';
+        const links = o.mediaLinks || {};
+        const icons = {
+          website: '🌐', facebook: '📘', instagram: '📸',
+          tiktok: '🎵', linkedin: '💼', youtube: '▶️'
+        };
+        Object.entries(links).forEach(([key, url]) => {
+          if (url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.innerText = icons[key] || '🔗';
+            panelMedia.appendChild(a);
           }
+        });
+
+        sidePanel.classList.add('open');
+        sidePanel.setAttribute('aria-hidden', 'false');
+      }
+
+      function closePanel() {
+        sidePanel.classList.remove('open');
+        sidePanel.setAttribute('aria-hidden', 'true');
+      }
+      closePanelBtn.addEventListener('click', closePanel);
+
+      // === Criar marcadores agrupados por categoria ===
+      const categorias = {};
+      fisicas.forEach(o => {
+        const cat = o.categoria || 'Outros';
+        if (!categorias[cat]) categorias[cat] = [];
+        categorias[cat].push(o);
+      });
+
+      const layers = {};
+      const allMarkers = [];
+
+      Object.entries(categorias).forEach(([cat, orgs]) => {
+        const layer = L.layerGroup();
+        orgs.forEach(o => {
+          const lat = parseFloat(o.address.latitude), lon = parseFloat(o.address.longitude);
+          if (isNaN(lat) || isNaN(lon)) return;
+
+          const marker = L.marker([lat, lon], {
+            icon: L.icon({
+              iconUrl: `icons/${cat}.svg`,
+              iconSize: [44, 44],
+              iconAnchor: [22, 22],
+              popupAnchor: [0, -22]
+            })
+          });
+
+          marker.bindPopup(gerarPopupHTML(o), { closeButton: false, offset: [0, -8] });
+          marker.on('click', () => {
+            marker.openPopup();
+            openPanelFor(o);
+            map.panTo([lat, lon], { animate: true });
+          });
+
+          marker.addTo(layer);
+          marker.orgData = o;
+          allMarkers.push(marker);
+        });
+        layers[cat] = layer;
+        layer.addTo(map);
+      });
+
+      // === Painel de filtros ===
+      const filterPanel = document.getElementById('filterPanel');
+      Object.keys(layers).forEach(cat => {
+        const btn = document.createElement('div');
+        btn.className = 'filter-item active';
+        const iconUrl = `icons_filter/${cat}.svg`;
+
+        const iconImg = document.createElement('img');
+        iconImg.src = iconUrl;
+        iconImg.alt = cat;
+        iconImg.style.width = '80px';
+        iconImg.style.height = '80px';
+        iconImg.style.objectFit = 'contain';
+
+        btn.appendChild(iconImg);
+        const categoryName = document.createElement('span');
+        categoryName.textContent = cat;
+        categoryName.style.display = 'none';
+        btn.appendChild(categoryName);
+
+        btn.addEventListener('click', () => {
+          if (map.hasLayer(layers[cat])) {
+            map.removeLayer(layers[cat]);
+            btn.classList.remove('active');
+          } else {
+            map.addLayer(layers[cat]);
+            btn.classList.add('active');
+          }
+        });
+
+        filterPanel.appendChild(btn);
+      });
+
+      // === Botão de alternar todos ===
+      const controlsDiv = document.createElement('div');
+      controlsDiv.className = 'filter-controls';
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'toggle-all';
+      toggleBtn.textContent = '👁️ Ocultar Todas';
+      let allVisible = true;
+      toggleBtn.addEventListener('click', () => {
+        allVisible = !allVisible;
+        toggleBtn.textContent = allVisible ? '👁️ Ocultar Todas' : '👁️ Mostrar Todas';
+        Object.entries(layers).forEach(([cat, layer]) => {
+          const btn = Array.from(filterPanel.children).find(el => el.textContent === cat);
+          if (allVisible) { map.addLayer(layer); btn.classList.add('active'); }
+          else { map.removeLayer(layer); btn.classList.remove('active'); }
+        });
+      });
+      controlsDiv.appendChild(toggleBtn);
+      filterPanel.appendChild(controlsDiv);
+
+      // === PESQUISA ===
+      const searchInput = document.getElementById('searchInput');
+      const resultsList = document.getElementById('searchResults');
+
+      searchInput.addEventListener('input', e => {
+
+        const q = e.target.value.toLowerCase().trim();
+        searchInput.placeholder = q ? `Pesquisando: ${q}` : '🔍 Pesquisar organizações...';
+
+        resultsList.innerHTML = '';
+        if (!q) {
+          resultsList.style.display = 'none';
+          return;
+        }
+
+        const results = pesquisaveis.filter(o => (o.nome || '').toLowerCase().includes(q));
+
+        // ✅ MOSTRAR MENSAGEM QUANDO NÃO HÁ RESULTADOS
+        if (results.length === 0) {
+          resultsList.innerHTML = `<li style="color:#999; text-align:center; padding:12px;">Nenhuma registro encontrado.</li>`;
+          resultsList.style.display = 'block';
+          return;
+        }
+
+        results.forEach(o => {
+          const li = document.createElement('li');
+          li.className = 'result-item';
+
+          // imagem só se existir
+          const image = o.img
+            ? `<img src="${o.img}" alt="${o.nome}" />`
+            : '';
+
+          const title = `<div class="m-title">${o.nome}</div>`;
+          const category = `<div class="m-cat">${o.categoria}</div>`;
+          li.innerHTML = `${image}${title}${category}`;
+
+          li.addEventListener('click', () => {
+            resultsList.innerHTML = '';
+            resultsList.style.display = 'none';
+            openPanelFor(o);
+
+            const lat = o?.address?.latitude;
+            const lon = o?.address?.longitude;
+            if (lat && lon) {
+              const latNum = parseFloat(lat), lonNum = parseFloat(lon);
+              if (!isNaN(latNum) && !isNaN(lonNum)) {
+                map.setView([latNum, lonNum], 15, { animate: true });
+                L.popup({ closeButton: false, offset: [0, -8] })
+                  .setLatLng([latNum, lonNum])
+                  .setContent(gerarPopupHTML(o))
+                  .openOn(map);
+              }
+            }
+          });
+
+          resultsList.appendChild(li);
+        });
+        resultsList.style.display = 'block';
+      });
+
+      // === BOTÃO DIGITAIS ===
+      const digitalBtn = document.getElementById('digitalBtn');
+      const digitalPanel = document.getElementById('digitalPanel');
+      const digitalList = document.getElementById('digitalList');
+
+      digitalBtn.addEventListener('click', () => {
+        digitalPanel.classList.toggle('open');
+
+        if (digitalPanel.classList.contains('open')) {
+          digitalList.innerHTML = '';
+
+          if (digitais.length === 0) {
+            digitalList.innerHTML = '<li>Nenhuma associação digital encontrada.</li>';
+            return;
+          }
+
+          digitais.forEach(o => {
+            const li = document.createElement('li');
+            const img = document.createElement('img');
+            img.src = o.img || 'default-image.png';
+            img.alt = o.nome || 'Sem imagem';
+
+            const infoDiv = document.createElement('div');
+            const name = document.createElement('div');
+            name.textContent = o.nome || '-';
+            name.style.fontWeight = '700';
+            name.style.color = 'var(--accent)';
+            const cat = document.createElement('div');
+            cat.textContent = o.categoria || '';
+            cat.style.fontSize = '13px';
+            cat.style.color = 'var(--muted)';
+
+            infoDiv.appendChild(name);
+            infoDiv.appendChild(cat);
+            li.appendChild(img);
+            li.appendChild(infoDiv);
+
+            li.addEventListener('click', () => {
+              openPanelFor(o);
+              digitalPanel.classList.remove('open');
+            });
+
+            digitalList.appendChild(li);
+          });
         }
       });
 
-      resultsList.appendChild(li);
+    }).catch(err => {
+      console.error('Erro a carregar data.json', err);
+      alert('Erro a carregar data.json — confirma o ficheiro e o formato (ver console).');
     });
-    resultsList.style.display = 'block';
-  });
-
-  // === BOTÃO DIGITAIS ===
-  const digitalBtn = document.getElementById('digitalBtn');
-  const digitalPanel = document.getElementById('digitalPanel');
-  const digitalList = document.getElementById('digitalList');
-
-  digitalBtn.addEventListener('click', () => {
-    digitalPanel.classList.toggle('open');
-
-    if (digitalPanel.classList.contains('open')) {
-      digitalList.innerHTML = '';
-
-      if (digitais.length === 0) {
-        digitalList.innerHTML = '<li>Nenhuma associação digital encontrada.</li>';
-        return;
-      }
-
-      digitais.forEach(o => {
-        const li = document.createElement('li');
-        const img = document.createElement('img');
-        img.src = o.img || 'default-image.png';
-        img.alt = o.nome || 'Sem imagem';
-
-        const infoDiv = document.createElement('div');
-        const name = document.createElement('div');
-        name.textContent = o.nome || '-';
-        name.style.fontWeight = '700';
-        name.style.color = 'var(--accent)';
-        const cat = document.createElement('div');
-        cat.textContent = o.categoria || '';
-        cat.style.fontSize = '13px';
-        cat.style.color = 'var(--muted)';
-
-        infoDiv.appendChild(name);
-        infoDiv.appendChild(cat);
-        li.appendChild(img);
-        li.appendChild(infoDiv);
-
-        li.addEventListener('click', () => {
-          openPanelFor(o);
-          digitalPanel.classList.remove('open');
-        });
-
-        digitalList.appendChild(li);
-      });
-    }
-  });
-
-}).catch(err => {
-  console.error('Erro a carregar data.json', err);
-  alert('Erro a carregar data.json — confirma o ficheiro e o formato (ver console).');
-});
-</script>
+  </script>
 
 
 </body>
