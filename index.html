@@ -243,7 +243,7 @@
 
     .panel-header {
       position: relative;
-      padding: 14px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -357,8 +357,8 @@
       right: 12px;
       top: 12px;
       background: rgba(0, 0, 0, 0.06);
-      width: 36px;
-      height: 36px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -595,8 +595,8 @@
           : 'Não possui telefone.';
 
         // Email
-        panelEmail.innerHTML = o.email
-          ? `<a href="mailto:${o.email}" style="color:var(--accent); text-decoration:none">${o.email}</a>`
+        panelEmail.innerHTML = o.eMail
+          ? `<a href="mailto:${o.eMail}" style="color:var(--accent); text-decoration:none">${o.eMail}</a>`
           : 'Não possui email.';
 
         // Website
