@@ -244,8 +244,8 @@
     }
 
     .panel-header img {
-      width: 110px;
-      height: 110px;
+      width: 300px;
+      height: 200px;
       object-fit: cover;
       border-radius: 12px;
       box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
@@ -498,290 +498,342 @@
   </aside>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    // Carrega dados
-    fetch('data.json').then(r => r.json()).then(data => {
-     const todos = Array.isArray(data) ? data : [];
+<script>
+fetch('data.json').then(r => r.json()).then(data => {
+  const todos = Array.isArray(data) ? data : [];
 
-// Físicas (com coordenadas válidas)
-const fisicas = todos.filter(d => (d.type || '').toLowerCase() === 'fisica' && d.address && d.address.latitude && d.address.longitude);
+  const fisicas = todos.filter(d => (d.type || '').toLowerCase() === 'fisica' && d.address && d.address.latitude && d.address.longitude);
+  const digitais = todos.filter(d => (d.type || '').toLowerCase() === 'digital');
+  const pesquisaveis = [...fisicas, ...digitais];
 
-// Digitais (sem coordenadas, mas queremos que apareçam nas pesquisas)
-const digitais = todos.filter(d => (d.type || '').toLowerCase() === 'digital');
+  const map = L.map('map').setView([38.72, -9.18], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
-// Junta os dois para pesquisa
-const pesquisaveis = [...fisicas, ...digitais];
+  // === Referências da interface ===
+  const sidePanel = document.getElementById('sidePanel');
+  const closePanelBtn = document.getElementById('closePanel');
+  const panelImg = document.getElementById('panelImg');
+  const panelName = document.getElementById('panelName');
+  const panelCat = document.getElementById('panelCat');
+  const panelMedia = document.getElementById('panelMedia');
+  const panelAbout = document.getElementById('panelAbout');
+  const panelAddress = document.getElementById('panelAddress');
+  const panelPhone = document.getElementById('panelPhone');
+  const panelEmail = document.getElementById('panelEmail');
+  const panelWebsite = document.getElementById('panelWebsite');
 
-      const map = L.map('map').setView([38.72, -9.18], 12);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
+// === Função para gerar popup curto ===
+function gerarPopupHTML(o) {
+  const thumb = o.img 
+    ? `<img src="${o.img}" alt="${(o.nome || '')}" 
+        style="width:48px;height:48px;object-fit:cover;border-radius:50%;border:none;" />`
+    : ''; // sem fundo quando não há imagem
 
-      // UI refs
-      const sidePanel = document.getElementById('sidePanel');
-      const closePanelBtn = document.getElementById('closePanel');
-      const panelImg = document.getElementById('panelImg');
-      const panelName = document.getElementById('panelName');
-      const panelCat = document.getElementById('panelCat');
-      const panelMedia = document.getElementById('panelMedia');
-      const panelAbout = document.getElementById('panelAbout');
-      const panelAddress = document.getElementById('panelAddress');
-      const panelPhone = document.getElementById('panelPhone');
-      const panelEmail = document.getElementById('panelEmail');
-      const panelWebsite = document.getElementById('panelWebsite');
+  return `
+    <div class="mini-popup" 
+         style="display:flex;align-items:center;gap:10px;">
+      ${thumb}
+      <div class="m-title" 
+           style="color:var(--accent);font-weight:700;font-size:15px;">
+        ${o.nome || ''}
+      </div>
+    </div>`;
+}
 
-      function gerarPopupHTML(o) {
-        const thumb = o.img ? `<img src="${o.img}" alt="${(o.nome || '')}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;" />` : `<div style="width:44px;height:44px;border-radius:6px;background:#eee;"></div>`;
-        return `<div class="mini-popup">${thumb}<div class="m-title">${o.nome || ''}</div></div>`;
-      }
 
-      function openPanelFor(o) {
-        panelImg.src = o.img || '';
-        panelImg.alt = o.nome || 'Imagem';
-        panelName.textContent = o.nome || '-';
-        panelCat.textContent = o.categoria || '';
-        panelAbout.textContent = o.proposito || (o.description || o.sobre || 'Sem descrição disponível.');
-        panelAddress.textContent = (o.address && o.address.fullAddress) ? o.address.fullAddress : (o.fullAddress || '-');
-        panelPhone.textContent = o.telefone || '-';
-        panelEmail.textContent = o.email || '-';
-        panelWebsite.innerHTML = o.website ? `<a href="${o.website}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${o.website}</a>` : '-';
-
-        // mediaLinks
-        panelMedia.innerHTML = '';
-        const links = o.mediaLinks || {};
-        if (links.website) { const a = document.createElement('a'); a.href = links.website; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '🌐'; panelMedia.appendChild(a); }
-        if (links.facebook) { const a = document.createElement('a'); a.href = links.facebook; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '📘'; panelMedia.appendChild(a); }
-        if (links.instagram) { const a = document.createElement('a'); a.href = links.instagram; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '📸'; panelMedia.appendChild(a); }
-        if (links.tiktok) { const a = document.createElement('a'); a.href = links.tiktok; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '🎵'; panelMedia.appendChild(a); }
-        if (links.linkedin) { const a = document.createElement('a'); a.href = links.linkedin; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '💼'; panelMedia.appendChild(a); }
-        if (links.youtube) { const a = document.createElement('a'); a.href = links.youtube; a.target = '_blank'; a.rel = 'noopener'; a.innerText = '▶️'; panelMedia.appendChild(a); }
-
-        sidePanel.classList.add('open');
-        sidePanel.setAttribute('aria-hidden', 'false');
-      }
-
-      function closePanel() {
-        sidePanel.classList.remove('open');
-        sidePanel.setAttribute('aria-hidden', 'true');
-      }
-
-      closePanelBtn.addEventListener('click', closePanel);
-
-      // criar marcadores e agrupar por categoria
-    // criar marcadores e agrupar por categoria
-const categorias = {};
-fisicas.forEach(o => {
-  const cat = o.categoria || 'Outros';
-  if (!categorias[cat]) categorias[cat] = [];
-  categorias[cat].push(o);
-});
-
-const layers = {};
-const allMarkers = [];
-
-Object.entries(categorias).forEach(([cat, orgs]) => {
-  const layer = L.layerGroup();
-  orgs.forEach(o => {
-    const lat = parseFloat(o.address.latitude), lon = parseFloat(o.address.longitude);
-    if (isNaN(lat) || isNaN(lon)) return;
-
-    const marker = L.marker([lat, lon], {
-      icon: L.icon({
-        iconUrl: `icons/${cat}.svg`, // ✅ Caminho relativo corrigido (sem barra inicial)
-        iconSize: [44, 44],
-        iconAnchor: [22, 22],
-        popupAnchor: [0, -22]
-      })
-    });
-
-    marker.bindPopup(gerarPopupHTML(o), { closeButton: false, offset: [0, -8] });
-
-    marker.on('click', function () {
-      marker.openPopup();
-      openPanelFor(o);
-      map.panTo([lat, lon], { animate: true });
-    });
-
-    marker.addTo(layer);
-    marker.orgData = o;
-    allMarkers.push(marker);
-  });
-  layers[cat] = layer;
-  layer.addTo(map);
-});
-
-// FILTROS - bottom-left
-const filterPanel = document.getElementById('filterPanel');
-Object.keys(layers).forEach(cat => {
-  const btn = document.createElement('div');
-  btn.className = 'filter-item active';
-
-  // ✅ Caminho relativo corrigido (sem barra inicial)
-  const iconUrl = `icons_filter/${cat}.svg`;
-
-  const iconImg = document.createElement('img');
-  iconImg.src = iconUrl;
-  iconImg.alt = cat;
-  iconImg.style.width = '80px';
-  iconImg.style.height = '80px';
-  iconImg.style.objectFit = 'contain';
-
-  btn.appendChild(iconImg);
-
-  const categoryName = document.createElement('span');
-  categoryName.textContent = cat;
-  categoryName.style.display = 'none';
-  btn.appendChild(categoryName);
-
-  btn.addEventListener('click', () => {
-    if (map.hasLayer(layers[cat])) {
-      map.removeLayer(layers[cat]);
-      btn.classList.remove('active');
+  // === Abrir painel lateral com dados ===
+  function openPanelFor(o) {
+    // --- imagem ---
+    if (o.img) {
+      panelImg.src = o.img;
+      panelImg.style.display = 'block';
     } else {
-      map.addLayer(layers[cat]);
-      btn.classList.add('active');
+      panelImg.src = '';
+      panelImg.style.display = 'none'; // ✅ oculta quando não há imagem
     }
+
+    // --- textos e info ---
+    panelName.textContent = o.nome || '-';
+ const categoriaMap = {
+  'grupo': 'Grupo',
+  'coletivo_cultural': 'Coletivo Cultural',
+  'associacao': 'Associação',
+  'empresa_social': 'Empresa Social',
+  'outros': 'Outros'
+};
+panelCat.textContent = categoriaMap[o.categoria?.toLowerCase()] || (o.categoria ? o.categoria.charAt(0).toUpperCase() + o.categoria.slice(1) : '-');
+
+    panelAbout.textContent = o.proposito || o.description || o.sobre || 'Sem descrição disponível.';
+
+// Morada — mostra o endereço visível e clicável
+if (o.address && (o.address.latitude && o.address.longitude)) {
+  const lat = o.address.latitude;
+  const lon = o.address.longitude;
+  const addr = o.address.fullAddress || 'Abrir no Google Maps';
+  panelAddress.innerHTML = `<a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${addr}</a>`;
+} else if (o.address && o.address.fullAddress) {
+  const addr = o.address.fullAddress;
+  const query = encodeURIComponent(addr);
+  panelAddress.innerHTML = `<a href="https://www.google.com/maps/search/?api=1&query=${query}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${addr}</a>`;
+} else {
+  panelAddress.textContent = 'Não possui morada física.';
+}
+
+
+// Telefone
+panelPhone.innerHTML = o.telefone 
+  ? `<a href="tel:${o.telefone}" style="color:var(--accent); text-decoration:none">${o.telefone}</a>` 
+  : 'Não possui telefone.';
+
+// Email
+panelEmail.innerHTML = o.email 
+  ? `<a href="mailto:${o.email}" style="color:var(--accent); text-decoration:none">${o.email}</a>` 
+  : 'Não possui email.';
+
+// Website
+panelWebsite.innerHTML = o.website 
+  ? `<a href="${o.website}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">${o.website}</a>` 
+  : 'Não possui website.';
+
+    // --- redes sociais ---
+    panelMedia.innerHTML = '';
+    const links = o.mediaLinks || {};
+    const icons = {
+      website: '🌐', facebook: '📘', instagram: '📸',
+      tiktok: '🎵', linkedin: '💼', youtube: '▶️'
+    };
+    Object.entries(links).forEach(([key, url]) => {
+      if (url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.innerText = icons[key] || '🔗';
+        panelMedia.appendChild(a);
+      }
+    });
+
+    sidePanel.classList.add('open');
+    sidePanel.setAttribute('aria-hidden', 'false');
+  }
+
+  function closePanel() {
+    sidePanel.classList.remove('open');
+    sidePanel.setAttribute('aria-hidden', 'true');
+  }
+  closePanelBtn.addEventListener('click', closePanel);
+
+  // === Criar marcadores agrupados por categoria ===
+  const categorias = {};
+  fisicas.forEach(o => {
+    const cat = o.categoria || 'Outros';
+    if (!categorias[cat]) categorias[cat] = [];
+    categorias[cat].push(o);
   });
 
-  filterPanel.appendChild(btn);
-});
+  const layers = {};
+  const allMarkers = [];
 
+  Object.entries(categorias).forEach(([cat, orgs]) => {
+    const layer = L.layerGroup();
+    orgs.forEach(o => {
+      const lat = parseFloat(o.address.latitude), lon = parseFloat(o.address.longitude);
+      if (isNaN(lat) || isNaN(lon)) return;
 
-
-      // toggle all control
-      const controlsDiv = document.createElement('div');
-      controlsDiv.className = 'filter-controls';
-      const toggleBtn = document.createElement('button');
-      toggleBtn.className = 'toggle-all';
-      toggleBtn.textContent = '👁️ Ocultar Todas';
-      let allVisible = true;
-      toggleBtn.addEventListener('click', () => {
-        allVisible = !allVisible;
-        toggleBtn.textContent = allVisible ? '👁️ Ocultar Todas' : '👁️ Mostrar Todas';
-        Object.entries(layers).forEach(([cat, layer]) => {
-          const btn = Array.from(filterPanel.children).find(el => el.textContent === cat);
-          if (allVisible) { map.addLayer(layer); btn.classList.add('active'); }
-          else { map.removeLayer(layer); btn.classList.remove('active'); }
-        });
-      });
-      controlsDiv.appendChild(toggleBtn);
-      filterPanel.appendChild(controlsDiv);
-
-      // SEARCH functionality
-      const searchInput = document.getElementById('searchInput');
-      const resultsList = document.getElementById('searchResults');
-
-      searchInput.addEventListener('input', e => {
-        const q = e.target.value.toLowerCase().trim();
-        
-        searchInput.placeholder = q ? `Pesquisando: ${q}` : '🔍 Pesquisar organizações...';
-
-        resultsList.innerHTML = '';
-        if (!q) {
-          resultsList.style.display = 'none';
-          return;
-        }
-
-        const results = pesquisaveis.filter(o => (o.nome || '').toLowerCase().includes(q))
-if (results.length === 0) {
-          resultsList.style.display = 'none';
-          return;
-        }
-
-        results.forEach(o => {
-          const li = document.createElement('li');
-          li.className = 'result-item';
-
-          // Criando a estrutura de exibição para o item (com imagem, nome e categoria)
-          const image = o.img ? `<img src="${o.img}" alt="${o.nome}" />` : `<img src="default-image.png" alt="${o.nome}" />`;
-          const title = `<div class="m-title">${o.nome}</div>`;
-          const category = `<div class="m-cat">${o.categoria}</div>`;
-          
-          li.innerHTML = `${image}${title}${category}`;
-          
-li.addEventListener('click', () => {
-  resultsList.innerHTML = ''; 
-  resultsList.style.display = 'none';
-  openPanelFor(o);
-
-  const lat = o?.address?.latitude;
-  const lon = o?.address?.longitude;
-  
-  if (lat && lon) {
-    const latNum = parseFloat(lat), lonNum = parseFloat(lon);
-    if (!isNaN(latNum) && !isNaN(lonNum)) {
-      map.setView([latNum, lonNum], 15, { animate: true });
-      L.popup({ closeButton: false, offset: [0, -8] })
-        .setLatLng([latNum, lonNum])
-        .setContent(gerarPopupHTML(o))
-        .openOn(map);
-    }
-  }
-});
-
-
-          resultsList.appendChild(li);
-        });
-        resultsList.style.display = 'block';
+      const marker = L.marker([lat, lon], {
+        icon: L.icon({
+          iconUrl: `icons/${cat}.svg`,
+          iconSize: [44, 44],
+          iconAnchor: [22, 22],
+          popupAnchor: [0, -22]
+        })
       });
 
-      // === BOTÃO DE ASSOCIAÇÕES DIGITAIS ===
-const digitalBtn = document.getElementById('digitalBtn');
-const digitalPanel = document.getElementById('digitalPanel');
-const digitalList = document.getElementById('digitalList');
+      marker.bindPopup(gerarPopupHTML(o), { closeButton: false, offset: [0, -8] });
+      marker.on('click', () => {
+        marker.openPopup();
+        openPanelFor(o);
+        map.panTo([lat, lon], { animate: true });
+      });
 
-digitalBtn.addEventListener('click', () => {
-  // Alterna visibilidade do painel
-  digitalPanel.classList.toggle('open');
+      marker.addTo(layer);
+      marker.orgData = o;
+      allMarkers.push(marker);
+    });
+    layers[cat] = layer;
+    layer.addTo(map);
+  });
 
-  // Se o painel for aberto, preenche a lista
-  if (digitalPanel.classList.contains('open')) {
-    digitalList.innerHTML = '';
+  // === Painel de filtros ===
+  const filterPanel = document.getElementById('filterPanel');
+  Object.keys(layers).forEach(cat => {
+    const btn = document.createElement('div');
+    btn.className = 'filter-item active';
+    const iconUrl = `icons_filter/${cat}.svg`;
 
-    if (digitais.length === 0) {
-      digitalList.innerHTML = '<li>Nenhuma associação digital encontrada.</li>';
+    const iconImg = document.createElement('img');
+    iconImg.src = iconUrl;
+    iconImg.alt = cat;
+    iconImg.style.width = '80px';
+    iconImg.style.height = '80px';
+    iconImg.style.objectFit = 'contain';
+
+    btn.appendChild(iconImg);
+    const categoryName = document.createElement('span');
+    categoryName.textContent = cat;
+    categoryName.style.display = 'none';
+    btn.appendChild(categoryName);
+
+    btn.addEventListener('click', () => {
+      if (map.hasLayer(layers[cat])) {
+        map.removeLayer(layers[cat]);
+        btn.classList.remove('active');
+      } else {
+        map.addLayer(layers[cat]);
+        btn.classList.add('active');
+      }
+    });
+
+    filterPanel.appendChild(btn);
+  });
+
+  // === Botão de alternar todos ===
+  const controlsDiv = document.createElement('div');
+  controlsDiv.className = 'filter-controls';
+  const toggleBtn = document.createElement('button');
+  toggleBtn.className = 'toggle-all';
+  toggleBtn.textContent = '👁️ Ocultar Todas';
+  let allVisible = true;
+  toggleBtn.addEventListener('click', () => {
+    allVisible = !allVisible;
+    toggleBtn.textContent = allVisible ? '👁️ Ocultar Todas' : '👁️ Mostrar Todas';
+    Object.entries(layers).forEach(([cat, layer]) => {
+      const btn = Array.from(filterPanel.children).find(el => el.textContent === cat);
+      if (allVisible) { map.addLayer(layer); btn.classList.add('active'); }
+      else { map.removeLayer(layer); btn.classList.remove('active'); }
+    });
+  });
+  controlsDiv.appendChild(toggleBtn);
+  filterPanel.appendChild(controlsDiv);
+
+  // === PESQUISA ===
+  const searchInput = document.getElementById('searchInput');
+  const resultsList = document.getElementById('searchResults');
+
+  searchInput.addEventListener('input', e => {
+    
+    const q = e.target.value.toLowerCase().trim();
+    searchInput.placeholder = q ? `Pesquisando: ${q}` : '🔍 Pesquisar organizações...';
+
+    resultsList.innerHTML = '';
+    if (!q) {
+      resultsList.style.display = 'none';
       return;
     }
 
-    digitais.forEach(o => {
-      const li = document.createElement('li');
-      const img = document.createElement('img');
-      img.src = o.img || 'default-image.png';
-      img.alt = o.nome || 'Sem imagem';
-      const infoDiv = document.createElement('div');
-      const name = document.createElement('div');
-      name.textContent = o.nome || '-';
-      name.style.fontWeight = '700';
-      name.style.color = 'var(--accent)';
-      const cat = document.createElement('div');
-      cat.textContent = o.categoria || '';
-      cat.style.fontSize = '13px';
-      cat.style.color = 'var(--muted)';
+    const results = pesquisaveis.filter(o => (o.nome || '').toLowerCase().includes(q));
 
-      infoDiv.appendChild(name);
-      infoDiv.appendChild(cat);
-      li.appendChild(img);
-      li.appendChild(infoDiv);
+    // ✅ MOSTRAR MENSAGEM QUANDO NÃO HÁ RESULTADOS
+    if (results.length === 0) {
+      resultsList.innerHTML = `<li style="color:#999; text-align:center; padding:12px;">Nenhuma registro encontrado.</li>`;
+      resultsList.style.display = 'block';
+      return;
+    }
+
+    results.forEach(o => {
+      const li = document.createElement('li');
+      li.className = 'result-item';
+
+      // imagem só se existir
+      const image = o.img 
+        ? `<img src="${o.img}" alt="${o.nome}" />` 
+        : '';
+
+      const title = `<div class="m-title">${o.nome}</div>`;
+      const category = `<div class="m-cat">${o.categoria}</div>`;
+      li.innerHTML = `${image}${title}${category}`;
 
       li.addEventListener('click', () => {
+        resultsList.innerHTML = '';
+        resultsList.style.display = 'none';
         openPanelFor(o);
-        digitalPanel.classList.remove('open');
+
+        const lat = o?.address?.latitude;
+        const lon = o?.address?.longitude;
+        if (lat && lon) {
+          const latNum = parseFloat(lat), lonNum = parseFloat(lon);
+          if (!isNaN(latNum) && !isNaN(lonNum)) {
+            map.setView([latNum, lonNum], 15, { animate: true });
+            L.popup({ closeButton: false, offset: [0, -8] })
+              .setLatLng([latNum, lonNum])
+              .setContent(gerarPopupHTML(o))
+              .openOn(map);
+          }
+        }
       });
 
-      digitalList.appendChild(li);
+      resultsList.appendChild(li);
     });
-  }
+    resultsList.style.display = 'block';
+  });
+
+  // === BOTÃO DIGITAIS ===
+  const digitalBtn = document.getElementById('digitalBtn');
+  const digitalPanel = document.getElementById('digitalPanel');
+  const digitalList = document.getElementById('digitalList');
+
+  digitalBtn.addEventListener('click', () => {
+    digitalPanel.classList.toggle('open');
+
+    if (digitalPanel.classList.contains('open')) {
+      digitalList.innerHTML = '';
+
+      if (digitais.length === 0) {
+        digitalList.innerHTML = '<li>Nenhuma associação digital encontrada.</li>';
+        return;
+      }
+
+      digitais.forEach(o => {
+        const li = document.createElement('li');
+        const img = document.createElement('img');
+        img.src = o.img || 'default-image.png';
+        img.alt = o.nome || 'Sem imagem';
+
+        const infoDiv = document.createElement('div');
+        const name = document.createElement('div');
+        name.textContent = o.nome || '-';
+        name.style.fontWeight = '700';
+        name.style.color = 'var(--accent)';
+        const cat = document.createElement('div');
+        cat.textContent = o.categoria || '';
+        cat.style.fontSize = '13px';
+        cat.style.color = 'var(--muted)';
+
+        infoDiv.appendChild(name);
+        infoDiv.appendChild(cat);
+        li.appendChild(img);
+        li.appendChild(infoDiv);
+
+        li.addEventListener('click', () => {
+          openPanelFor(o);
+          digitalPanel.classList.remove('open');
+        });
+
+        digitalList.appendChild(li);
+      });
+    }
+  });
+
+}).catch(err => {
+  console.error('Erro a carregar data.json', err);
+  alert('Erro a carregar data.json — confirma o ficheiro e o formato (ver console).');
 });
+</script>
 
 
-      
-
-    }).catch(err => {
-      console.error('Erro a carregar data.json', err);
-      alert('Erro a carregar data.json — confirma o ficheiro e o formato (ver console).');
-    });
-  </script>
 </body>
 
 </html>
