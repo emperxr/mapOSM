@@ -2,500 +2,551 @@
 <html lang="pt-PT">
 
 <head>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Luckiest+Guy&family=Sriracha&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Luckiest+Guy&family=Sriracha&display=swap"
+    rel="stylesheet">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Mapa OSM Online</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<style>
-  :root {
-    --bg: #F5E9D0;
-    --accent: #E47D29;
-    --card: #fff;
-    --muted: #6b6b6b;
-    --glass: rgba(255, 255, 255, 0.88);
-    --panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  <style>
+    :root {
+      --bg: #F5E9D0;
+      --accent: #E47D29;
+      --card: #fff;
+      --muted: #6b6b6b;
+      --glass: rgba(255, 255, 255, 0.88);
+      --panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
 
-    /* Fontes */
-    --font-body: 'Heebo', sans-serif;
-    --font-title: 'Luckiest Guy', cursive;
-    --font-subtitle: 'Sriracha', cursive;
-  }
-
-  html,
-  body {
-    height: 100%;
-    margin: 0;
-    font-family: var(--font-body);
-    background: var(--bg);
-  }
-
-  #map {
-    height: 100vh;
-    width: 100%;
-  }
-
-  /* Search (top-right) */
-  .search-box {
-    position: absolute;
-    top: 12px;
-    right: 20px;
-    z-index: 1400;
-  }
-
-  .search-box input {
-    padding: 8px 10px;
-    border-radius: 12px;
-    border: 1px solid #ccc;
-    width: 280px;
-    font-size: 14px;
-    background: #fff;
-    font-family: var(--font-body);
-  }
-
-  .search-box input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 6px rgba(228, 125, 41, 0.18);
-  }
-
-  #searchResults {
-    position: absolute;
-    top: 46px;
-    right: 0;
-    z-index: 1500;
-    width: 350px;
-    max-height: 300px;
-    overflow-y: auto;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-    display: none;
-    padding: 10px;
-    font-family: var(--font-body);
-  }
-
-  #searchResults li {
-    list-style: none;
-    padding: 10px;
-    border-bottom: 1px solid #f0f0f0;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: var(--font-body);
-  }
-
-  #searchResults li:hover {
-    background: #fbefe0;
-  }
-
-  .result-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .result-item img {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 6px;
-    background-color: #eee;
-  }
-
-  .result-item .m-title {
-    font-weight: bold;
-    color: var(--accent);   
-    font-family: var(--font-title); /* LUCKIEST GUY */
-    font-weight: 400;
-  letter-spacing: 0.1em;
-  }
-
-  .result-item .m-cat {
-    font-size: 12px;
-    color: var(--muted);
-    font-family: var(--font-subtitle);
-    
-  }
-
-  /* Botão Digitais */
-  #digitalBtn {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1500;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: #fff;
-    font-size: 24px;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-    transition: transform 0.2s ease, background 0.2s;
-    font-family: var(--font-body);
-  }
-
-  #digitalBtn:hover {
-    background: #d66a1f;
-    transform: scale(1.05);
-  }
-
-  #digitalPanel {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 360px;
-    max-height: 70vh;
-    background: var(--glass);
-    backdrop-filter: blur(6px);
-    border-radius: 12px;
-    box-shadow: var(--panel-shadow);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    display: none;
-    flex-direction: column;
-    z-index: 2000;
-    overflow: hidden;
-    animation: fadeIn 0.2s ease;
-    font-family: var(--font-body);
-  }
-
-  #digitalPanel.open {
-    display: flex;
-  }
-
-  #digitalPanel h3 {
-    margin: 0;
-    padding: 12px 16px;
-    background: var(--accent);
-    color: white;
-    font-size: 16px;
-    text-align: center;
-    font-family: var(--font-subtitle);
-  }
-
-  #digitalList {
-    list-style: none;
-    margin: 0;
-    padding: 10px;
-    overflow-y: auto;
-    flex: 1;
-  }
-
-  #digitalList li {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border-bottom: 1px solid #f0f0f0;
-    cursor: pointer;
-    background: white;
-    border-radius: 8px;
-    margin-bottom: 6px;
-    font-family: var(--font-body);
-  }
-
-  #digitalList li:hover {
-    background: #fbefe0;
-  }
-
-  #digitalList img {
-    width: 44px;
-    height: 44px;
-    border-radius: 6px;
-    object-fit: cover;
-    background: #eee;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
+      /* Fontes */
+      --font-body: 'Heebo', sans-serif;
+      --font-title: 'Luckiest Guy', cursive;
+      --font-subtitle: 'Sriracha', cursive;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: var(--font-body);
+      background: var(--bg);
     }
-  }
 
-  .side-panel {
-    position: fixed;
-    right: 18px;
-    top: 56px;
-    width: 35%;
-    max-width: 400px;
-    min-width: 280px;
-    height: calc(100vh - 96px);
-    background: var(--glass);
-    border-radius: 12px;
-    box-shadow: var(--panel-shadow);
-    z-index: 2000;
-    transform: translateX(420px);
-    transition: transform 260ms ease;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    backdrop-filter: blur(4px);
-    font-family: var(--font-body);
-  }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
 
-  .side-panel.open {
-    transform: translateX(0);
-  }
+    /* Search (top-right) */
+    .search-box {
+      position: absolute;
+      top: 12px;
+      right: 20px;
+      z-index: 1400;
+    }
 
-  @media(max-width:900px) {
+    .search-box input {
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      width: 280px;
+      font-size: 14px;
+      background: #fff;
+      font-family: var(--font-body);
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 6px rgba(228, 125, 41, 0.18);
+    }
+
+    #searchResults {
+      position: absolute;
+      top: 46px;
+      right: 0;
+      z-index: 1500;
+      width: 350px;
+      max-height: 300px;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      display: none;
+      padding: 10px;
+      font-family: var(--font-body);
+    }
+
+    #searchResults li {
+      list-style: none;
+      padding: 10px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-body);
+    }
+
+    #searchResults li:hover {
+      background: #fbefe0;
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .result-item img {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+      background-color: #eee;
+    }
+
+    .result-item .m-title {
+      font-weight: bold;
+      color: var(--accent);
+      font-family: var(--font-title);
+      /* LUCKIEST GUY */
+      font-weight: 400;
+      letter-spacing: 0.1em;
+    }
+
+    .result-item .m-cat {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--font-subtitle);
+
+    }
+
+    /* Botão Digitais */
+    #digitalBtn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1500;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 24px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+      transition: transform 0.2s ease, background 0.2s;
+      font-family: var(--font-body);
+    }
+
+    #digitalBtn:hover {
+      background: #d66a1f;
+      transform: scale(1.05);
+    }
+
+    #digitalPanel {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 360px;
+      max-height: 70vh;
+      background: var(--glass);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      box-shadow: var(--panel-shadow);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      display: none;
+      flex-direction: column;
+      z-index: 2000;
+      overflow: hidden;
+      animation: fadeIn 0.2s ease;
+      font-family: var(--font-body);
+    }
+
+    #digitalPanel.open {
+      display: flex;
+    }
+
+    #digitalPanel h3 {
+      margin: 0;
+      padding: 12px 16px;
+      background: var(--accent);
+      color: white;
+      font-size: 16px;
+      text-align: center;
+      font-family: var(--font-subtitle);
+    }
+
+    #digitalList {
+      list-style: none;
+      margin: 0;
+      padding: 10px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    #digitalList li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-family: var(--font-body);
+    }
+
+    #digitalList li:hover {
+      background: #fbefe0;
+    }
+
+    #digitalList img {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #eee;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .side-panel {
-      width: 90%;
-      right: 6px;
-      transform: translateX(110%);
+      position: fixed;
+      right: 18px;
+      top: 56px;
+      width: 35%;
+      max-width: 400px;
+      min-width: 280px;
+      height: calc(100vh - 96px);
+      background: var(--glass);
+      border-radius: 12px;
+      box-shadow: var(--panel-shadow);
+      z-index: 2000;
+      transform: translateX(420px);
+      transition: transform 260ms ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      backdrop-filter: blur(4px);
+      font-family: var(--font-body);
     }
-  }
 
-  .panel-header {
-    position: relative;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.98));
-  }
+    .side-panel.open {
+      transform: translateX(0);
+    }
 
-  .panel-header img {
-    width: 300px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 12px;
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
-    border: 4px solid rgba(255, 255, 255, 0.85);
-    background: #eee;
-  }
+    @media(max-width:900px) {
+      .side-panel {
+        width: 90%;
+        right: 6px;
+        transform: translateX(110%);
+      }
+    }
 
-  .panel-name {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--accent);
-    text-align: center;
-    margin-top: 6px;
-    font-family: var(--font-title); /* LUCKIEST GUY */
-    font-weight: 400;
-  letter-spacing: 0.1em;
-  }
+    .panel-header {
+      position: relative;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.98));
+    }
 
-  .panel-cat {
-    font-size: 13px;
-    color: var(--muted);
-    text-align: center;
-    font-family: var(--font-subtitle);
-  }
+    .panel-header img {
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+      border: 4px solid rgba(255, 255, 255, 0.85);
+      background: #eee;
+    }
 
-  .media-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    justify-content: center;
-    margin-top: 6px;
-  }
+    .panel-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      text-align: center;
+      margin-top: 6px;
+      font-family: var(--font-title);
+      /* LUCKIEST GUY */
+      font-weight: 400;
+      letter-spacing: 0.1em;
+    }
 
-  .media-row a {
-    display: inline-flex;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    background: #fff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-    font-size: 16px;
-  }
+    .panel-cat {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      font-family: var(--font-subtitle);
+    }
 
-  .panel-body {
-    padding: 12px 16px;
-    margin: 0 20px;
-    overflow: auto;
-    flex: 1;
-  }
+    .media-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .media-row a {
+      display: inline-flex;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      font-size: 16px;
+    }
+
+    .panel-body {
+      padding: 12px 16px;
+      margin: 0 12px;
+      overflow: auto;
+      flex: 1;
+    }
 
     .panel-about {
-    margin: 0 15px;
-  }
+      margin: 0 30px;
+    }
 
-  .section-title {
-    color: var(--accent);
-    font-weight: 700;
-    padding-left: 15%;
-    margin: 5px 0px;
-    font-size: 13px;
-    font-family: var(--font-subtitle); /* SRIRACHA */
-    letter-spacing: 0.1em;
-  }
-  
-  .section-about-title {
-    color: var(--accent);
-    font-weight: 700;
-    margin: 5px 0;
-    font-size: 13px;
-    font-family: var(--font-subtitle); /* SRIRACHA */
-    letter-spacing: 0.1em;
-  }
+    .section-title {
+      color: var(--accent);
+      font-weight: 700;
+      padding-left: 15%;
+      margin: 5px 0px;
+      font-size: 13px;
+      font-family: var(--font-subtitle);
+      /* SRIRACHA */
+      letter-spacing: 0.1em;
+    }
 
-  .about {
-    font-size: 14px;
-    color: #333;
-    margin-bottom: 12px;
-    white-space: pre-wrap;
-    font-family: var(--font-body);
-  }
+    .section-about-title {
+      color: var(--accent);
+      font-weight: 700;
+      margin: 5px 0;
+      font-size: 13px;
+      font-family: var(--font-subtitle);
+      /* SRIRACHA */
+      letter-spacing: 0.1em;
+    }
 
-  .info-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin: 4px 4px;
-  }
+    .about {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+      font-family: var(--font-body);
+    }
 
-  .info-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex: 0 0 34px;
-  }
+    .info-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 4px 4px;
+    }
 
-  .info-text {
-    font-size: 14px;
-    color: #333;
-    word-break: break-word;
-    font-family: var(--font-body);
-  }
+    .info-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex: 0 0 34px;
+    }
 
-  .static-activities {
-    margin-top: 12px;
-    padding: 10px;
-    background: #fff6f0;
-    border-radius: 8px;
-    border: 1px solid rgba(228, 125, 41, 0.06);
-    color: var(--muted);
-    font-size: 13px;
-    font-family: var(--font-body);
-  }
+    .info-text {
+      font-size: 14px;
+      color: #333;
+      word-break: break-word;
+      font-family: var(--font-body);
+    }
 
-  .panel-close {
-    position: absolute;
-    right: 12px;
-    top: 12px;
-    background: rgba(0, 0, 0, 0.06);
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border: none;
-  }
+    .static-activities {
+      margin-top: 12px;
+      padding: 10px;
+      background: #fff6f0;
+      border-radius: 8px;
+      border: 1px solid rgba(228, 125, 41, 0.06);
+      color: var(--muted);
+      font-size: 13px;
+      font-family: var(--font-body);
+    }
 
-  /* Filters bottom-left */
-  .filter-panel {
-    position: absolute;
-    left: 16px;
-    bottom: 16px;
-    z-index: 1300;
-    border-radius: 10px;
-    padding: 10px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-    max-width: 260px;
-    font-family: var(--font-body);
-  }
+    .panel-close {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      background: rgba(0, 0, 0, 0.06);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+    }
 
-  .filter-item {
-    border-radius: 25px;
-    background: #fff;
-    cursor: pointer;
-    font-weight: 700;
-    color: var(--accent);
-    font-size: 13px;
-    font-family: var(--font-subtitle); /* SRIRACHA */
-  }
+    /* Filters bottom-left */
+    .filter-panel {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 1300;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      max-width: 260px;
+      font-family: var(--font-body);
+    }
 
-  .filter-item.active {
-    background: var(--accent);
-    color: #fff;
-  }
+    .filter-item {
+      border-radius: 25px;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 13px;
+      font-family: var(--font-subtitle);
+      /* SRIRACHA */
+    }
 
-  .filter-controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    justify-content: center;
-  }
+    .filter-item.active {
+      background: var(--accent);
+      color: #fff;
+    }
 
-  .toggle-all {
-    padding: 6px 10px;
-   margin-left: 40%;
-    border-radius: 8px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    font-family: var(--font-body);
-  }
+    .filter-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
 
-#toggleFilterBtn {
-  position: absolute;
-  bottom: 28px; /* antes era top: 16px */
-  left: 16px;
-  z-index: 1400;
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 20px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease, background 0.2s;
-}
+    .toggle-all {
+      padding: 6px 10px;
+      margin-left: 40%;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
 
-/* Ocultar o painel de filtros por padrão */
-.filter-panel {
-  display: none; /* agora começa oculto */
-}
-.filter-panel.open {
-  display: flex; /* exibe quando tiver a classe open */
-}
+    #toggleFilterBtn {
+      position: absolute;
+      bottom: 28px;
+      /* antes era top: 16px */
+      left: 16px;
+      z-index: 1400;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 20px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, background 0.2s;
+    }
+
+    /* Ocultar o painel de filtros por padrão */
+    .filter-panel {
+      display: none;
+      /* agora começa oculto */
+    }
+
+    .filter-panel.open {
+      display: flex;
+      /* exibe quando tiver a classe open */
+    }
 
 
-#toggleFilterBtn:hover {
-  background: #d66a1f;
-  transform: scale(1.05);
-}
+    #toggleFilterBtn:hover {
+      background: #d66a1f;
+      transform: scale(1.05);
+    }
 
 
-  /* leaflet z-index */
-  .leaflet-container {
-    z-index: 0;
-    font-family: var(--font-body);
-  }
-</style>
+    /* leaflet z-index */
+    .leaflet-container {
+      z-index: 0;
+      font-family: var(--font-body);
+    }
+
+    .leaflet-control-zoom-in,
+    .leaflet-control-zoom-out {
+      background: transparent !important;
+      color: transparent !important;
+      width: 60px !important;
+      height: 60px !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .leaflet-control-zoom-in::before {
+      content: "";
+      width: 58px;
+      height: 58px;
+      background-image: url("icons_filter/zoomMaxIcon.svg");
+
+    }
+
+    /* Ícone personalizado do Zoom OUT */
+    .leaflet-control-zoom-out::before {
+      content: "";
+      width: 58px;
+      height: 58px;
+      background-image: url("icons_filter/zoomMinIcon.svg");
+
+    }
+
+    .leaflet-control-zoom-in span,
+    .leaflet-control-zoom-out span {
+      color: transparent !important;
+      font-size: 0 !important;
+
+    }
+  </style>
 
 </head>
 
@@ -511,7 +562,7 @@
 
   <!-- Painel com lista de Digitais -->
   <div id="digitalPanel">
-    <h3>🌐 Associações Digitais</h3>
+    <h3> Associações Digitais</h3>
     <ul id="digitalList"></ul>
   </div>
 
@@ -520,9 +571,9 @@
 
   <!-- Filters bottom-left -->
   <div id="filterPanel" class="filter-panel" aria-hidden="false"></div>
-  
-<!-- Botão para mostrar filtros -->
-<button id="toggleFilterBtn" title="Mostrar Filtros">☰</button>
+
+  <!-- Botão para mostrar filtros -->
+  <button id="toggleFilterBtn" title="Mostrar Filtros">☰</button>
 
 
   <!-- SIDE PANEL -->
@@ -535,7 +586,7 @@
       <div class="media-row" id="panelMedia"></div>
     </div>
     <div class="panel-about">
-            <div>
+      <div>
         <div class="section-about-title">Sobre</div>
         <div class="about" id="panelAbout">Proposito</div>
       </div>
@@ -585,7 +636,7 @@
     </div>
   </aside>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   // === Botão para mostrar/esconder filtros ===
   const toggleFilterBtn = document.getElementById('toggleFilterBtn');
@@ -599,7 +650,7 @@
     }
   });
 
-  // Opcional: Fechar painel ao clicar fora (mobile-friendly)
+  // Fechar painel de filtros ao clicar fora
   document.addEventListener('click', (e) => {
     if (
       filterPanel.style.display === 'flex' &&
@@ -610,7 +661,7 @@
     }
   });
 
-  // Mantém o restante do seu script atual (Leaflet, pesquisa, painel lateral, etc.)
+  // === CARREGAR DATA.JSON ===
   fetch('data.json').then(r => r.json()).then(data => {
     const todos = Array.isArray(data) ? data : [];
 
@@ -618,12 +669,14 @@
     const digitais = todos.filter(d => (d.type || '').toLowerCase() === 'digital');
     const pesquisaveis = [...fisicas, ...digitais];
 
+    // === MAPA ===
     const map = L.map('map').setView([38.72, -9.18], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    // === Side Panel ===
     const sidePanel = document.getElementById('sidePanel');
     const closePanelBtn = document.getElementById('closePanel');
     const panelImg = document.getElementById('panelImg');
@@ -658,6 +711,7 @@
       }
 
       panelName.textContent = o.nome || '-';
+
       const categoriaMap = {
         'grupo': 'Grupo',
         'coletivo_cultural': 'Coletivo Cultural',
@@ -665,7 +719,8 @@
         'empresa_social': 'Empresa Social',
         'outros': 'Outros'
       };
-      panelCat.textContent = categoriaMap[o.categoria?.toLowerCase()] || (o.categoria ? o.categoria.charAt(0).toUpperCase() + o.categoria.slice(1) : '-');
+      panelCat.textContent = categoriaMap[o.categoria?.toLowerCase()] || (o.categoria || '-');
+
       panelAbout.textContent = o.proposito || o.description || o.sobre || 'Sem descrição disponível.';
 
       // Morada
@@ -737,7 +792,7 @@
     }
     closePanelBtn.addEventListener('click', closePanel);
 
-    // === Marcadores ===
+    // === MARCADORES NO MAPA ===
     const categorias = {};
     fisicas.forEach(o => {
       const cat = o.categoria || 'Outros';
@@ -762,20 +817,29 @@
           })
         });
         marker.bindPopup(gerarPopupHTML(o), { closeButton: false, offset: [0, -8] });
-        marker.on('click', () => { marker.openPopup(); openPanelFor(o); map.panTo([lat, lon], { animate: true }); });
+
+        marker.on('click', () => {
+          marker.openPopup();
+          openPanelFor(o);
+          map.panTo([lat, lon], { animate: true });
+        });
+
         marker.addTo(layer);
         marker.orgData = o;
         allMarkers.push(marker);
       });
+
       layers[cat] = layer;
       layer.addTo(map);
     });
 
-    // === Filtros ===
+    // === FILTROS ===
     const filterPanelElem = document.getElementById('filterPanel');
+
     Object.keys(layers).forEach(cat => {
       const btn = document.createElement('div');
       btn.className = 'filter-item active';
+
       const iconUrl = `icons_filter/${cat}.svg`;
       const iconImg = document.createElement('img');
       iconImg.src = iconUrl;
@@ -784,38 +848,99 @@
       iconImg.style.height = '60px';
       iconImg.style.objectFit = 'contain';
       btn.appendChild(iconImg);
+
       const categoryName = document.createElement('span');
       categoryName.textContent = cat;
       categoryName.style.display = 'none';
       btn.appendChild(categoryName);
 
       btn.addEventListener('click', () => {
-        if (map.hasLayer(layers[cat])) { map.removeLayer(layers[cat]); btn.classList.remove('active'); }
-        else { map.addLayer(layers[cat]); btn.classList.add('active'); }
+        if (map.hasLayer(layers[cat])) {
+          map.removeLayer(layers[cat]);
+          btn.classList.remove('active');
+        } else {
+          map.addLayer(layers[cat]);
+          btn.classList.add('active');
+        }
       });
 
       filterPanelElem.appendChild(btn);
     });
 
-    // === Botão alternar todos ===
+    // === Alternar todos ===
     const controlsDiv = document.createElement('div');
     controlsDiv.className = 'filter-controls';
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'toggle-all';
     toggleBtn.textContent = 'Ocultar Todas';
     let allVisible = true;
+
     toggleBtn.addEventListener('click', () => {
       allVisible = !allVisible;
       toggleBtn.textContent = allVisible ? 'Ocultar Todas' : 'Mostrar Todas';
+
       Object.entries(layers).forEach(([cat, layer]) => {
         const btn = Array.from(filterPanelElem.children).find(el => el.textContent === cat);
-        if (allVisible) { map.addLayer(layer); btn.classList.add('active'); }
-        else { map.removeLayer(layer); btn.classList.remove('active'); }
+        if (allVisible) {
+          map.addLayer(layer);
+          btn.classList.add('active');
+        } else {
+          map.removeLayer(layer);
+          btn.classList.remove('active');
+        }
       });
     });
+
     controlsDiv.appendChild(toggleBtn);
     filterPanelElem.appendChild(controlsDiv);
-  }).catch(err => { console.error('Erro a carregar data.json', err); alert('Erro a carregar data.json — ver console.'); });
+
+    // ============================================================
+    // === 🔥 LÓGICA COMPLETA DO DIGITAL BTN (RESTAURADA) 🔥 ===
+    // ============================================================
+
+    const digitalBtn = document.getElementById('digitalBtn');
+    const digitalPanel = document.getElementById('digitalPanel');
+    const digitalList = document.getElementById('digitalList');
+
+    // Abrir / Fechar painel
+    digitalBtn.addEventListener('click', () => {
+      digitalPanel.classList.toggle('open');
+    });
+
+    // Preencher lista digital
+    function preencherDigitais() {
+      digitalList.innerHTML = '';
+
+      if (!digitais.length) {
+        digitalList.innerHTML = `<li>Nenhuma organização digital encontrada.</li>`;
+        return;
+      }
+
+      digitais.forEach(o => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <img src="${o.img || 'https://via.placeholder.com/44'}" alt="">
+          <div>
+            <div style="font-weight:700;color:var(--accent)">${o.nome}</div>
+            <div style="font-size:12px;color:var(--muted)">${o.categoria || 'Digital'}</div>
+          </div>
+        `;
+
+        li.addEventListener('click', () => {
+          digitalPanel.classList.remove('open');
+          openPanelFor(o);
+        });
+
+        digitalList.appendChild(li);
+      });
+    }
+
+    preencherDigitais();
+
+  }).catch(err => {
+    console.error('Erro a carregar data.json', err);
+    alert('Erro a carregar data.json — ver console.');
+  });
 </script>
 
 
